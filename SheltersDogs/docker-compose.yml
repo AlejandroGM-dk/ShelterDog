@@ -1,0 +1,36 @@
+services:
+  php:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: ShelterDogs_Laravel
+    working_dir: /app
+    volumes:
+      - ./src:/app
+    ports:
+      - "8000:8000"
+    networks:
+      - shelterdogs_network
+    depends_on:
+      - mysql
+    command: php artisan serve --host=0.0.0.0 --port=8000  
+
+  mysql:
+    image: mysql:8.0
+    container_name: ShelterDogs_MySQL
+    environment:
+      MYSQL_DATABASE: shelterdogs_db
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_PASSWORD: 123@abc
+      MYSQL_USER: shelterdogs_user
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql_data:/var/lib/mysql
+    networks:
+      - shelterdogs_network
+
+
+networks:  
+  shelterdogs_network:
+    driver: bridge
