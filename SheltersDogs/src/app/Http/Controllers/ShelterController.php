@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Shelter;
+
 class ShelterController extends Controller
 {
     public function createShelter(Request $request)
     {
+        
     $request->validate([
         'name' => 'required|string',
         'city' => 'required|string',
@@ -25,11 +27,7 @@ class ShelterController extends Controller
         }else{return response()->json(['message' => 'El refugio ya existe'], 400);
     }
     }
-    public function showShelters(Request $request)
-    {
-        $shelters = Shelter::all();
-        return response()->json($shelters);
-    }
+
 
     public function addDogToShelter(Request $request, $shelter_id)
     {
@@ -50,4 +48,45 @@ class ShelterController extends Controller
         ]);
         return response()->json($dog, 201);
     }
+    
+    public function index()
+    {
+        $shelters = Shelter::withCount(['dogs as total_dogs', 'dogs as adopted_dogs_count' => function($q){
+            $q->where('status', 'adopted');
+        }])->get();
+        return response()->json($shelters);
+    }
+public function allShelters() 
+    {
+        try{
+
+        $shelters = Shelter::withCount(['dogs as total_dogs', 'dogs as adopted_dogs_count' => function($q){
+            $q->where('status', 'adopted');
+        }])->get();
+
+            
+            return response()->json($shelters);
+        }catch(\Exception $e) {  
+            return response()->json([
+            'error' => $e->getMessage(),
+            'line' => $e->getLine(),
+            'file' => $e->getFile()
+        ], 500);}
+    }
+        public function showShelters($id) 
+    {
+    try{
+        if($id==0){return response()->json(Shelter::all());}
+        $shelter = Shelter::with('dogs:id,name,breed,status,shelter_id')->findOrFail($id);
+        return response()->json($shelter);
+        }catch(\Exception $e) {  
+            return response()->json([
+            'error' => $e->getMessage(),
+            'line' => $e->getLine(),
+            'file' => $e->getFile()
+        ], 500);}
+        
+    }
+    
+
 }
