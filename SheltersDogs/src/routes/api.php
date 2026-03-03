@@ -14,7 +14,7 @@ Route::get('/user', function (Request $request) {
 
 Route::post('/login', [AuthController::class, 'login']);
 
-//hola
+
 
 
 
